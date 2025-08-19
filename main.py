@@ -1,5 +1,7 @@
 import os
 import logging
+from http.server import BaseHTTPRequestHandler, HTTPServer
+import threading
 
 from dotenv import load_dotenv
 from telegram import Update
@@ -19,6 +21,20 @@ logging.basicConfig(
 logging.getLogger("httpx").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
+
+class HealthCheckHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        self.wfile.write(b"Bot is running")
+
+def run_health_check_server():
+    port = int(os.getenv("PORT", 8080)) # Default to 8080 if PORT not set
+    server_address = ('', port)
+    httpd = HTTPServer(server_address, HealthCheckHandler)
+    print(f"Starting health check server on port {port}")
+    httpd.serve_forever()
 
 def main() -> None:
     """Start the bot."""
@@ -53,4 +69,8 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    # Start the health check server in a separate thread
+    health_check_thread = threading.Thread(target=run_health_check_server)
+    health_check_thread.daemon = True  # Allow the main program to exit even if this thread is running
+    health_check_thread.start()
     main()
