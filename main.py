@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler
 
-from handlers import start_command, balance_command, getaccount_command, get_account_callback, myaccounts_command, code_callback, rem_callback, admin_command, addcredit_command, setcredit_command, userbalance_command, admin_add_credit_callback, admin_user_balance_callback, admin_list_users_callback, admin_inventory_callback
+from handlers import start_command, balance_command, getaccount_command, get_account_callback, myaccounts_command, code_callback, rem_callback, admin_command, addcredit_command, setcredit_command, userbalance_command, admin_add_credit_callback, admin_user_balance_callback, admin_list_users_callback, admin_inventory_callback, add_number_command
 from db import SessionLocal, engine, setup_db
 from models import Base
 
@@ -39,6 +39,7 @@ def main() -> None:
     application.add_handler(CommandHandler("addcredit", addcredit_command))
     application.add_handler(CommandHandler("setcredit", setcredit_command))
     application.add_handler(CommandHandler("userbalance", userbalance_command))
+    application.add_handler(CommandHandler("addnumber", add_number_command))
     application.add_handler(CallbackQueryHandler(admin_add_credit_callback, pattern="^admin_add_credit$"))
     application.add_handler(CallbackQueryHandler(admin_user_balance_callback, pattern="^admin_user_balance$"))
     application.add_handler(CallbackQueryHandler(admin_list_users_callback, pattern="^admin_list_users$"))

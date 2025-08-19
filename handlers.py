@@ -427,6 +427,34 @@ async def userbalance_command(update: Update, context: ContextTypes.DEFAULT_TYPE
         await update.message.reply_text(f"User {user.username or user.tg_id} has {user.credits} credits.")
 
 
+async def add_number_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Add a new number to the database."""
+    if not await is_admin(update.effective_user.id):
+        await update.message.reply_text("You are not authorized to use this command.")
+        return
+
+    if len(context.args) != 2:
+        await update.message.reply_text("Usage: /addnumber <phone_number> <gs_token>")
+        return
+
+    phone_number, gs_token = context.args
+
+    with get_session() as session:
+        existing_number = session.query(Number).filter_by(phone=phone_number).first()
+        if existing_number:
+            await update.message.reply_text(f"Number {phone_number} already exists.")
+            return
+
+        new_number = Number(
+            phone=phone_number,
+            gs_token=gs_token,
+            status=StatusEnum.free
+        )
+        session.add(new_number)
+        session.commit()
+        await update.message.reply_text(f"Successfully added number {phone_number}.")
+
+
 async def fetch_code(gs_token: str) -> str:
     """Fetches SMS code from the external service."""
     url = f"http://ca.irbots.com:27/gs={gs_token}"
